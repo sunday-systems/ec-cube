@@ -40,6 +40,9 @@ DirectoryIndex index.php index.html .ht
     # RewriteCond %{HTTP:x-sakura-forwarded-for} !^$
     # RewriteRule ^(.*) - [E=HTTPS:on]
 
+    #LB配下でHTTPS ON
+    SetEnvIf X-Forwarded-Proto ^https$ HTTPS=on
+
     RewriteRule "^\.git" - [F]
     RewriteRule "^src/" - [F]
     RewriteRule "^app/" - [F]
