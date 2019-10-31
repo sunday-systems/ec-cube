@@ -1,0 +1,146 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ec-cube-md4eccube-pvc
+  namespace: develop
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+  storageClassName: standard
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ec-cube-md4eccube
+  namespace: develop
+  labels:
+    app: ec-cube
+    role: web
+    branch: md4eccube
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ec-cube
+      role: web
+      branch: md4eccube
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0%
+      maxUnavailable: 100%
+  template:
+    metadata:
+      labels:
+        app: ec-cube
+        role: web
+        branch: md4eccube
+    spec:
+      containers:
+      - name: web
+        image: asia.gcr.io/sunday-systems-develop/ec-cube-md4eccube:latest
+        resources:
+          requests:
+            cpu: 0
+            memory: 0
+          limits:
+            cpu: 0
+            memory: 0
+        env:
+        - name: ECCUBE_APP_ROOT
+          value: /var/www/vhosts/eccube
+        - name: APACHE_HOST_NAME
+          value: md4eccube.sundaysys.com
+        - name: APACHE_DOCUMENT_ROOT
+          value: /var/www/vhosts/eccube
+        - name: PHP_MEMORY_LIMIT
+          value: 256M
+        - name: GIT_REPO_USER
+          value: sunday-systems
+        - name: GIT_REPO_PROJECT
+          value: ec-cube
+        - name: GIT_REPO_BRANCH
+          value: md4eccube
+        - name: GIT_AUTH_USER
+          valueFrom:
+            secretKeyRef:
+              name: github-access-token
+              key: user
+        - name: GIT_AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: github-access-token
+              key: token
+        - name: GIT_LOCAL_USER_NAME
+          value: nakamichi
+        - name: GIT_LOCAL_USER_EMAIL
+          value: shinra.develop@gmail.com
+        volumeMounts:
+        - name: www-data
+          mountPath: /var/www/vhosts
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          initialDelaySeconds: 5
+          periodSeconds: 20
+          httpGet:
+            path: /health.php
+            port: 80
+      - name: cloudsql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.11
+        resources:
+          requests:
+            cpu: 0
+            memory: 0
+          limits:
+            cpu: 0
+            memory: 0
+        command: ["/cloud_sql_proxy",
+                  "-instances=sunday-systems-develop:asia-northeast1:ss-dev=tcp:3306",
+                  "-credential_file=/secrets/cloudsql/credentials.json"]
+        securityContext:
+          runAsUser: 2
+          allowPrivilegeEscalation: false
+        volumeMounts:
+        - name: cloudsql-instance-credentials
+          mountPath: /secrets/cloudsql
+          readOnly: true
+        readinessProbe:
+          initialDelaySeconds: 5
+          periodSeconds: 20
+          httpGet:
+            path: /health.php
+            port: 80
+      volumes:
+      - name: cloudsql-instance-credentials
+        secret:
+          secretName: cloudsql-instance-credentials
+      - name: www-data
+        persistentVolumeClaim:
+            claimName: ec-cube-md4eccube-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ec-cube-md4eccube
+  namespace: develop
+  labels:
+    app: ec-cube
+    role: web
+    branch: md4eccube
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  externalTrafficPolicy: Local
+  selector:
+    app: ec-cube
+    role: web
+    branch: md4eccube
+  type:  NodePort
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80

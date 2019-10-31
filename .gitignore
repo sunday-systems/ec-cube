@@ -42,6 +42,7 @@ composer.phar
 *.php~
 .env
 .maintenance
+.vscode
 
 ###> symfony/phpunit-bridge ###
 .phpunit
