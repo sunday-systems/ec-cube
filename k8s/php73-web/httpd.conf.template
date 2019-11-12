@@ -24,7 +24,7 @@ TraceEnable off
 
 RemoteIPHeader X-Forwarded-For
 #Add k8s pod,k8s node,GoogleHC,L7 LB ip ranges
-RemoteIPInternalProxy 10.60.0.0/14 10.0.4.0/22 130.211.0.0/22 35.191.0.0/16 34.98.87.44/32
+RemoteIPInternalProxy 10.60.0.0/14 10.0.4.0/22 130.211.0.0/22 35.191.0.0/16 34.84.28.187/32
 
 #
 # ServerRoot: The top of the directory tree under which the server's
