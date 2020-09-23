@@ -13,7 +13,6 @@ RUN yum -y update \
 && yum -y install --enablerepo=remi,remi-php73 php php-common php-gd php-opcache php-mbstring php-mcrypt php-pecl-apc php-xml php-pecl-imagick php-pdo php-pgsql php-mysql php-process php-soap php-xmlrpc php-pecl-zip php-json php-cURL php-intl \
 && yum clean all \
 && php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-&& php -r "if (hash_file('sha384', 'composer-setup.php') === 'a5c698ffe4b8e849a443b120cd5ba38043260d5c4023dbf93e1558871f1f07f58274fc6f4c93bcfd858c6bd0775cd8d1') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
 && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
 && php -r "unlink('composer-setup.php');" \
 && localedef -f UTF-8 -i ja_JP ja_JP.UTF-8
