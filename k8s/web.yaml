@@ -99,7 +99,7 @@ spec:
             cpu: 0
             memory: 0
         command: ["/cloud_sql_proxy",
-                  "-instances=sunday-systems-develop:asia-northeast1:ss-dev=tcp:3306",
+                  "-instances=sunday-systems-develop:asia-northeast1:ss-dev-mysql-8=tcp:3306",
                   "-credential_file=/secrets/cloudsql/credentials.json"]
         securityContext:
           runAsUser: 2
